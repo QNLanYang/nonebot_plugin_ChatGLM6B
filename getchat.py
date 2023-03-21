@@ -6,7 +6,7 @@ from nonebot.params import CommandArg
 
 import requests
 
-from .config import config
+from .utils import config
 
 if config.chatglm_2pic:
     require("nonebot_plugin_htmlrender")
@@ -15,6 +15,8 @@ if config.chatglm_2pic:
 #以上为import部分，以下为实现部分
 
 chatglm = on_command("GLM", aliases={"#"}, priority=99, block=False, rule=to_me())
+
+clr_log = on_command("清除上下文", aliases={"clrlog"}, priority=99, block=False, rule=to_me())
 
 @chatglm.handle()
 async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
@@ -29,10 +31,14 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     await chatglm.send(Message(f'[CQ:poke,qq={event.user_id}]'))
 
     #检查地址是否填写
-    if not await config._checkaddr(config.chatglm_addr):
+    if not await config.check_addr(config.chatglm_addr):
         await chatglm.finish("请检查API地址是否填写正确，以'http(s)://'开头", at_sender=True)
 
-    history = []
+    #读取历史对话记录
+    if config.chatglm_mmry:
+        history = await config.load_history()
+    else:
+        history = []
 
     #调用API
     try:
@@ -49,6 +55,10 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     #得到正确回复
     resp, history = res.json()["response"], res.json()["history"]
 
+    #保存历史对话
+    if config.chatglm_mmry:
+        await config.save_history(history)
+
     #转图片
     if config.chatglm_2pic:
         if resp.count("```") % 2 != 0:
@@ -57,5 +67,15 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
         resp = MessageSegment.image(img)
 
     #返回生成的文本
-    ans = MessageSegment.reply(event.message_id) + resp
-    await chatglm.finish(ans)
+    if config.chatglm_rply:
+        ans = MessageSegment.reply(event.message_id) + resp
+        await chatglm.finish(ans)
+    else:
+        await chatglm.finish(resp, at_sender=True)
+
+@clr_log.handle()
+async def clear_history():
+    if await config.clr_history():
+        await clr_log.finish("历史对话已清除。")
+
+
