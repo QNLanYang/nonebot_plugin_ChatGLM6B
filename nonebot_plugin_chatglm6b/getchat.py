@@ -4,7 +4,7 @@ from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment, Bot
 from nonebot.params import CommandArg
 
-import requests
+import httpx
 
 from .utils import config
 
@@ -42,7 +42,9 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
 
     #调用API
     try:
-        res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
+        #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)        
+        async with httpx.AsyncClient() as api:
+            res = await api.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
 
     #排查错误
     except Exception as error:
