@@ -1,4 +1,4 @@
-from . import getchat, config
+from . import getchat, utils
 
 from nonebot.plugin import PluginMetadata
 
