@@ -94,6 +94,10 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 |       GLM\|#       | 所有人 |  是   | 私聊/群聊 |   对话起始   |
 | clrlog\|清除上下文 | 所有人 |  是   | 私聊/群聊 | 清除对话记录 |
 
+## 🖼️ 效果图
+
+![插件效果图](https://raw.githubusercontent.com/QNLanYang/nonebot_plugin_ChatGLM6B/main/.data/%E5%AF%B9%E8%AF%9D%E5%8F%8A%E8%AE%B0%E5%BF%86.png "对话和记忆")
+
 ## ✅ 代办
 
 - [x] 加入记忆保存上下文
