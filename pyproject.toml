@@ -9,6 +9,10 @@ dependencies = [
     "nonebot2>=2.0.0rc2",
     "nonebot-adapter-onebot>=2.1.5",
     "nonebot-plugin-htmlrender>=0.2.0.1",
+    "httpx",
+    "pydantic",
+    "aiofiles",
+    "pathlib",
 ]
 requires-python = ">=3.8"
 readme = "README.md"
