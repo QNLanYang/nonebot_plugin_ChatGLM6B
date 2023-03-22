@@ -26,7 +26,9 @@ _✨ ChatGPT连不上？不如看看本地部署的GLM吧 ✨_
 ~~*首先本人技术很有限，插件都是照着别人的格式拼凑的，能用就行*~~
 
 ✨感谢 跨平台异步Python机器人框架 **[Nonebot](https://nb2.baka.icu/)** ✨
+
 ✨感谢 **[THUDM](https://github.com/THUDM)** 开源的 **[Chat GLM-6B](https://huggingface.co/THUDM/chatglm-6b)** ✨
+
 ✨感谢 **[imClumsyPand](https://github.com/imClumsyPanda)** 使用FastAPI实现的 **[ChatGLM-6B-API](https://github.com/imClumsyPanda/ChatGLM-6B-API)** ✨
 
 #### 注意事项

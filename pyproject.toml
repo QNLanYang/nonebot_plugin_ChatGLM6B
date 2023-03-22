@@ -1,0 +1,21 @@
+[project]
+name = "nonebot-plugin-chatglm6b"
+version = "0.0.4"
+description = "NoneBot2 plugin for ChatGLM-6B-API"
+authors = [
+    { name = "Lan Yang", email = "QNLanYang@outlook.com" },
+]
+dependencies = [
+    "nonebot2>=2.0.0rc2",
+    "nonebot-adapter-onebot>=2.1.5",
+    "nonebot-plugin-htmlrender>=0.2.0.1",
+]
+requires-python = ">=3.8"
+readme = "README.md"
+
+[project.license]
+text = "GPL 3.0"
+
+[project.urls]
+Homepage = "https://github.com/QNLanYang/nonebot_plugin_ChatGLM6B"
+Repository = "https://github.com/QNLanYang/nonebot_plugin_ChatGLM6B"
