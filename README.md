@@ -38,12 +38,12 @@ _✨ ChatGPT连不上？不如看看本地部署的GLM吧 ✨_
 
 ## 💿 安装
 
-Clone本项目到你的Bot根目录的`./src/plugins/nonebot_plugin_ChatGLM6B`目录下。
+Clone本项目到你的Bot根目录的`./src/plugins/nonebot_plugin_chatglm6b`目录下。
 
 
 打开 nonebot2 项目根目录下的 `pyproject.toml` 文件, 在 `[tool.nonebot]` 部分追加写入
 
-    plugins = ["nonebot_plugin_ChatGLM6B"]
+    plugins = ["nonebot_plugin_chatglm6b"]
 
 
 
@@ -57,7 +57,7 @@ Clone本项目到你的Bot根目录的`./src/plugins/nonebot_plugin_ChatGLM6B`�
 | CHATGLM_POKE | 否 | bool | True | 收到请求后是否戳一戳发送者 |
 | CHATGLM_2PIC | 否 | bool | False | 是否将收到的回答以图片形式发送 |
 | CHATGLM_WIDE | 否 | int | 400 | 转图片时的图片宽度 |
-| CHATGLM_MMRY | 否 | int | 20 | 对话时机器人所能记住的最大对话轮数，设为0则每次都为新对话 |
+| CHATGLM_MMRY | 否 | int | 10 | 对话时机器人所能记住的最大对话轮数，设为0则每次都为新对话 |
 
 
 
@@ -69,10 +69,11 @@ Clone本项目到你的Bot根目录的`./src/plugins/nonebot_plugin_ChatGLM6B`�
 
 | 指令 | 权限 | 需要@ | 范围 | 说明 |
 |:-----:|:----:|:----:|:----:|:----:|
-| GLM | 所有人 | 是 | 私聊/群聊 | 对话起始 |
-| # | 所有人 | 是 | 私聊/群聊 | 对话起始 |
+| GLM\|# | 所有人 | 是 | 私聊/群聊 | 对话起始 |
+| clrlog\|清除上下文 | 所有人 | 是 | 私聊/群聊 | 清除对话记录 |
 
 
 ## ✅ 代办
 
-- [ ]  加入记忆保存上下文
+- [x]  加入记忆保存上下文
+- [ ]  区分每个用户的对话历史，并加入可选参数选择群聊对话为私有或公开
