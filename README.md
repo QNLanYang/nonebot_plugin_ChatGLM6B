@@ -40,13 +40,34 @@ _✨ ChatGPT连不上？不如看看本地部署的GLM吧 ✨_
 
 ## 💿 安装
 
-Clone本项目到你的Bot根目录的`./src/plugins/nonebot_plugin_chatglm6b`目录下。
+<details>
+<summary>使用 nb-cli 安装（推荐）</summary>
+在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
 
+    nb plugin install nonebot-plugin-example
 
+</details>
+
+<details>
+<summary>使用包管理器安装</summary>
+在 nonebot2 项目的插件目录下, 打开命令行, 根据你使用的包管理器, 输入相应的安装命令
+
+<details>
+<summary>pip</summary>
+
+    pip install nonebot-plugin-example
+
+</details>
 打开 nonebot2 项目根目录下的 `pyproject.toml` 文件, 在 `[tool.nonebot]` 部分追加写入
 
     plugins = ["nonebot_plugin_chatglm6b"]
 
+</details>
+
+<details>
+<summary>手动安装</summary>
+下载最新版本Release，将文件夹存放至Bot根目录的`./src/plugins/`目录中
+</details>
 
 
 ## ⚙️ 配置
