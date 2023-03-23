@@ -99,6 +99,7 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
     plugins = ["nonebot_plugin_chatglm6b"]
 
 </details>
+</details>
 
 <details>
 <summary>手动安装</summary>
