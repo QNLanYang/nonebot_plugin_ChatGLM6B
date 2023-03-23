@@ -1,14 +1,13 @@
 from nonebot import on_command, require
 from nonebot.rule import to_me
 from nonebot.log import logger
-from nonebot.adapters.onebot.v11 import (MessageEvent, PrivateMessageEvent,
-                        GroupMessageEvent , Message, MessageSegment, Bot)
+from nonebot.adapters.onebot.v11 import (MessageEvent, Message, MessageSegment, Bot)
 from nonebot.params import CommandArg
 
 import aiohttp
 
 from .save import record
-from .check import check
+from .request import check, request
 from .config import config
 
 if config.chatglm_2pic:
@@ -40,14 +39,13 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
 
     #读取历史对话记录
     if config.chatglm_mmry:
-        uid = get_recpath(event)
-        history = await record.load_history(uid)
+        history, jsonpath = await record.load_history(event)
     else:
         history = []
 
     #调用API
     try:
-        resp, history = await get_resp(txt, history)
+        resp, history = await request.get_resp(txt, history)
 
     #排查错误
     except Exception as e:
@@ -63,7 +61,7 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
 
     #保存历史对话
     if config.chatglm_mmry:
-        await record.save_history(history,uid)
+        await record.save_history(history,jsonpath)
 
     #转图片
     if config.chatglm_2pic:
@@ -81,39 +79,5 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
 
 @clr_log.handle()   #清除历史功能
 async def clear_history(event=MessageEvent):
-    uid = get_recpath(event)
-    if await record.clr_history(uid):
+    if await record.clr_history(event):
         await clr_log.finish("历史对话已清除。")
-
-def get_recpath(event):   #生成对应对话记录文件名
-    if isinstance(event, GroupMessageEvent):
-        uid = event.get_session_id()
-        if config.chatglm_pblc:
-            uid = uid.replace(f"{event.user_id}", "Public")
-    else:
-        uid = "Private_" + f"{event.user_id}"
-    # if groupmessage get_session_id returns 'Group_{group_id}_{user_id}'
-    return uid
-
-async def get_resp(txt, history):
-    #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history) as res:
-                if res.status not in [200, 201]:
-                    logger.error(await res.text())
-                    raise RuntimeError(f"与服务器沟通时发生{res.status}错误")
-                resp, history = (await res.json())["response"], (await res.json())["history"]
-                return resp, history
-
-    except aiohttp.ServerTimeoutError:  #响应超时
-        logger.error("请求超时。\n" + res)
-        raise RuntimeError(f"可恶，这个AI没反应了，要不炖了吧？")
-
-    except aiohttp.InvalidURL:  #地址错误
-        logger.error("API服务器地址格式有误")
-        raise RuntimeError(f"配置有误，请反馈给我的主人。")
-
-    except Exception as e:  #其他情况
-        logger.error("error:" + str(e) + "\nresponse:" + await res.text())
-        raise RuntimeError(f"请求时出现未知错误：{str(e)}")
