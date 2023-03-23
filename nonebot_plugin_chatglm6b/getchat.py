@@ -1,12 +1,13 @@
 from nonebot import on_command, require
 from nonebot.rule import to_me
 from nonebot.log import logger
-from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment, Bot
+from nonebot.adapters.onebot.v11 import (MessageEvent, PrivateMessageEvent,
+                        GroupMessageEvent , Message, MessageSegment, Bot)
 from nonebot.params import CommandArg
 
-import httpx
+import httpx, traceback
 
-from .utils import config
+from .utils import config, record
 
 if config.chatglm_2pic:
     require("nonebot_plugin_htmlrender")
@@ -30,36 +31,41 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     #若响应成功则戳一戳用户
     await chatglm.send(Message(f'[CQ:poke,qq={event.user_id}]'))
 
-    #检查地址是否填写
-    if not await config.check_addr(config.chatglm_addr):
-        await chatglm.finish("请检查API地址是否填写正确，以'http(s)://'开头", at_sender=True)
-
     #读取历史对话记录
     if config.chatglm_mmry:
-        history = await config.load_history()
+        uid = get_recpath(event)
+        history = await record.load_history(uid)
     else:
         history = []
 
     #调用API
     try:
-        #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)        
-        async with httpx.AsyncClient() as api:
-            res = await api.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
+        #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
+        async with httpx.AsyncClient() as client:
+            res = await client.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
 
     #排查错误
-    except Exception as error:
-        logger.error(error)
-        await chatglm.finish(str(error), at_sender=True)
-    
-    if res.status_code != 200:
-        await chatglm.finish(f"与API服务器沟通时出现问题，错误{res.status_code}", at_sender=True)
+    except httpx.HTTPError as e:
+        logger.error(e)
+        #traceback.print_exc()
+        await chatglm.finish("与服务器沟通时出现错误："+str(e), at_sender=True)
+
+    except httpx.InvalidURL as e:
+        logger.error(e)
+        #traceback.print_exc()
+        await chatglm.finish("API服务器地址有误："+str(e), at_sender=True)
+
+    except Exception as e:
+        logger.error(e)
+        #traceback.print_exc()
+        await chatglm.finish("请求时出现未知错误："+str(e), at_sender=True)
     
     #得到正确回复
     resp, history = res.json()["response"], res.json()["history"]
 
     #保存历史对话
     if config.chatglm_mmry:
-        await config.save_history(history)
+        await record.save_history(history,uid)
 
     #转图片
     if config.chatglm_2pic:
@@ -75,9 +81,18 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     else:
         await chatglm.finish(resp, at_sender=True)
 
-@clr_log.handle()
-async def clear_history():
-    if await config.clr_history():
+@clr_log.handle()   #清除历史功能
+async def clear_history(event=MessageEvent):
+    uid = get_recpath(event)
+    if await record.clr_history(uid):
         await clr_log.finish("历史对话已清除。")
 
-
+def get_recpath(event):   #生成对应对话记录文件名
+    if isinstance(event, GroupMessageEvent):
+        uid = event.get_session_id()
+        if config.chatglm_pblc:
+            uid = uid.replace(f"{event.user_id}", "Public")
+    else:
+        uid = "Private_" + f"{event.user_id}"
+    # if groupmessage get_session_id returns 'Group_{group_id}_{user_id}'
+    return uid

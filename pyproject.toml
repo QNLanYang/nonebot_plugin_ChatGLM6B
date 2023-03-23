@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-chatglm6b"
-version = "0.0.4"
+version = "0.0.5"
 description = "NoneBot2 plugin for ChatGLM-6B-API"
 authors = [
     { name = "Lan Yang", email = "QNLanYang@outlook.com" },
