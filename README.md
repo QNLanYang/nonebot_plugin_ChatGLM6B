@@ -37,7 +37,18 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 #### 注意事项
 
 本插件需要你有部署好的 ChatGLM-6B 并且成功运行 ChatGLM-6B-API
-关于本地部署的细节请点击上方相关链接自行查询
+关于本地部署的细节请点击上方相关链接自行查询（或者我可以考虑B站出个教程 ~~如果给我点star的话~~）
+
+#### 最新消息
+
+**v0.0.5** --> **v0.1.0**
+是第一个较大的更新，主要内容有：
+	从 httpx 换到 aiohttp 以更好的支持异步处理
+	有更完善的~~(相对)~~异常处理，减少无响应或者其他卡住不动的情况
+	支持了精确到每群每用户的独立对话记录，且不受到时间限制永久保存
+
+然后就是一些 ~小~ 的改动了比如文件名 **大** 改，细分功能模块~~（咳咳）~~
+花了我两天时间吧所以可能更新有点慢了。
 
 ## 💿 安装
 
@@ -45,7 +56,7 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 <summary>使用 nb-cli 安装（推荐）</summary>
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
 
-    nb plugin install nonebot-plugin-example
+    nb plugin install nonebot-plugin-chatglm6b
 
 </details>
 
@@ -60,6 +71,29 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 
 </details>
 
+<details>
+<summary>pdm</summary>
+
+    pdm add nonebot-plugin-chatglm6b
+
+</details>
+
+<details>
+<summary>poetry</summary>
+
+    poetry add nonebot-plugin-chatglm6b
+
+</details>
+
+<details>
+<summary>conda</summary>
+
+    conda install nonebot-plugin-chatglm6b
+
+</details>
+
+<details>
+<summary>下一步是……</summary>
 打开 nonebot2 项目根目录下的 `pyproject.toml` 文件, 在 `[tool.nonebot]` 部分追加写入
 
     plugins = ["nonebot_plugin_chatglm6b"]
@@ -68,20 +102,23 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 
 <details>
 <summary>手动安装</summary>
-下载最新版本Release或main分支源码，将文件夹存放至Bot根目录的`./src/plugins/`目录中
+下载最新版本Release或main分支源码，将插件文件夹存放至Bot根目录的`./src/plugins/`目录中
+（记得检查Bot根目录的`pyproject.toml`中`[tool.nonebot]` 部分有`plugin_dirs = ["src/plugins"]`
 </details>
 
 ## ⚙️ 配置
 
 在 nonebot2 项目的`.env`文件中添加下表中的必填配置
 
-|    配置项    | 必填 | 类型 | 默认值 | 说明                                                        |
-| :----------: | :--: | :--: | :----: | :---------------------------------------------------------- |
-| CHATGLM_ADDR |  是  | str  |   无   | 你的 ChatGLM API 的接口地址，例如`http://127.0.0.1:11451`   |
-| CHATGLM_POKE |  否  | bool |  True  | 收到请求后是否戳一戳发送者                                  |
-| CHATGLM_2PIC |  否  | bool | False  | 是否将收到的回答以图片形式发送                              |
-| CHATGLM_WIDE |  否  | int  |  400   | 转图片时的图片宽度                                          |
-| CHATGLM_MMRY |  否  | int  |   10   | 对话时机器人所能记住的最大对话轮数，设为 0 则每次都为新对话 |
+|    配置项    | 必填 |  类型  | 默认值  | 说明                                                        |
+| :----------: | :--: | :----: | :-----: | :---------------------------------------------------------- |
+| CHATGLM_ADDR |  是  | `str`  |   无    | 你的 ChatGLM API 的接口地址，例如`http://127.0.0.1:11451`   |
+| CHATGLM_POKE |  否  | `bool` | `True`  | 收到请求后是否戳一戳发送者                                  |
+| CHATGLM_2PIC |  否  | `bool` | `False` | 是否将收到的回答以图片形式发送                              |
+| CHATGLM_WIDE |  否  | `int`  |  `400`  | 转图片时的图片宽度（单位：像素）                            |
+| CHATGLM_MMRY |  否  | `int`  |  `10`   | 对话时机器人所能记住的最大对话轮数，设为`0`则每次都为新对话 |
+| CHATGLM_PBLC |  否  | `bool` | `False` | 在群聊中是否启用公共对话，即群员共用对话历史                |
+| CHATGLM_RPLY |  否  | `bool` | `False` | 机器人返回内容时是否回复对应消息                            |
 
 ## 🎉 使用
 
@@ -98,10 +135,14 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 
 ![插件效果图](https://raw.githubusercontent.com/QNLanYang/nonebot_plugin_ChatGLM6B/main/.data/%E5%AF%B9%E8%AF%9D%E5%8F%8A%E8%AE%B0%E5%BF%86.png "对话和记忆")
 
+~~效果图懒得改了，这是以前的，意思就是有记忆了~~
+
 ## ✅ 代办
 
-- [x] 加入记忆保存上下文
-- [ ] 区分每个用户的对话历史，并加入可选参数选择群聊对话为私有或公开
+- [x] ~~加入记忆保存上下文~~
+- [x] ~~区分每个用户的对话历史，并加入可选参数选择群聊对话为私有或公开~~
+- [ ] 加入预设机器人人格
+- [ ] 加入更多管理员指令
 
 ## 🌸 致谢
 
@@ -110,4 +151,4 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 - [ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B)，可以跑在消费级显卡上的大语言模型
 - [ChatGLM-6B-API](https://github.com/imClumsyPanda/ChatGLM-6B-API)，提供了与GLM6B交流的API
 - [nonebot-plugin-novelai](https://github.com/sena-nana/nonebot-plugin-novelai)，学习的对象，配置项导入的部分来源于此
-- [nonebot-plugin-ChatGLM](https://github.com/DaoMingze/zhukebot/tree/main/zhukebot/plugins/chatglm)，与本项目相似，但是本地部署的版本，从中学习优化代码结构（或新功能？）~~开抄~~
+- [nonebot-plugin-ChatGLM](https://github.com/DaoMingze/zhukebot/tree/main/zhukebot/plugins/chatglm)，与本项目相似，但是本地部署的版本，从中学习优化代码结构（或新功能？）~~开抄！~~

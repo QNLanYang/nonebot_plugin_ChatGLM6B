@@ -4,8 +4,6 @@ from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import (MessageEvent, Message, MessageSegment, Bot)
 from nonebot.params import CommandArg
 
-import aiohttp
-
 from .save import record
 from .request import request
 from .config import config
