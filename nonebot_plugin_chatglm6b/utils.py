@@ -37,10 +37,10 @@ class Record:
         jsonpath = self.__get_path(uid)
         if not jsonpath.exists():
             jsonpath.parent.mkdir(parents=True, exist_ok=True)
-            async with aiofiles.open(jsonpath, "w") as f:
+            async with aiofiles.open(jsonpath, "w", encoding="utf-8") as f:
                 await f.write("{}")
         else:
-            async with aiofiles.open(jsonpath, "r") as f:
+            async with aiofiles.open(jsonpath, "r", encoding="utf-8") as f:
                 data = await f.read()
             if data is None:
                 os.remove(jsonpath)
@@ -49,7 +49,7 @@ class Record:
     async def load_history(self,uid):    #读取历史记录
         jsonpath = self.__get_path(uid)
         await self.__init_json(uid)
-        async with aiofiles.open(jsonpath, "r") as f:
+        async with aiofiles.open(jsonpath, "r", encoding="utf-8") as f:
             jsonraw = await f.read()
             data = json.loads(jsonraw)
             log = list(data)
@@ -58,7 +58,7 @@ class Record:
     async def save_history(self,log,uid):    #保存对话记录 
         jsonpath = self.__get_path(uid)
         log = await self.check_length(log)
-        async with aiofiles.open(jsonpath, "w") as f:
+        async with aiofiles.open(jsonpath, "w", encoding="utf-8") as f:
             jsonnew = json.dumps(log)
             await f.write(jsonnew)
     
@@ -72,4 +72,4 @@ class Record:
         os.remove(jsonpath)
         return True
 
-record = Record
+record = Record()

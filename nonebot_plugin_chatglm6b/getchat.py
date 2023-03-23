@@ -5,7 +5,7 @@ from nonebot.adapters.onebot.v11 import (MessageEvent, PrivateMessageEvent,
                         GroupMessageEvent , Message, MessageSegment, Bot)
 from nonebot.params import CommandArg
 
-import httpx, traceback
+import httpx
 
 from .utils import config, record
 
@@ -38,27 +38,35 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     else:
         history = []
 
+    res = ""
     #调用API
     try:
         #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(15.0)) as client:
             res = await client.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
+            res.raise_for_status()
 
     #排查错误
-    except httpx.HTTPError as e:
-        logger.error(e)
-        #traceback.print_exc()
-        await chatglm.finish("与服务器沟通时出现错误："+str(e), at_sender=True)
+    
+    except httpx.ConnectTimeout:
+        logger.error("连接服务器失败，请检查服务器状态\n" + res)
+        await chatglm.finish("服务好像没有开启呢，问问我的主人吧！", at_sender=True)
 
-    except httpx.InvalidURL as e:
-        logger.error(e)
-        #traceback.print_exc()
-        await chatglm.finish("API服务器地址有误："+str(e), at_sender=True)
+    except httpx.NetworkError:
+        logger.error("出错了，请检查网络状态\n" + res)
+        await chatglm.finish("ChatGLM被玩坏了，这绝对不是ChatGLM的问题，绝对不是。", at_sender=True)
+
+    except httpx.TimeoutException:
+        logger.error("请求超时。\n" + res)
+        await chatglm.finish("可恶，这个AI没反应了，要不炖了吧？", at_sender=True)
+
+    except httpx.InvalidURL:
+        logger.error("API服务器地址格式有误")
+        await chatglm.finish("配置有误，请反馈给我的主人。", at_sender=True)
 
     except Exception as e:
-        logger.error(e)
-        #traceback.print_exc()
-        await chatglm.finish("请求时出现未知错误："+str(e), at_sender=True)
+        logger.error("error:" + str(e) + "\nresponse:" + res)
+        await chatglm.finish(f"请求时出现未知错误：{str(e)}", at_sender=True)
     
     #得到正确回复
     resp, history = res.json()["response"], res.json()["history"]
