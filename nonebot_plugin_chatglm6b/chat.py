@@ -5,9 +5,11 @@ from nonebot.adapters.onebot.v11 import (MessageEvent, PrivateMessageEvent,
                         GroupMessageEvent , Message, MessageSegment, Bot)
 from nonebot.params import CommandArg
 
-import httpx
+import aiohttp
 
-from .utils import config, record
+from .save import record
+from .check import check
+from .config import config
 
 if config.chatglm_2pic:
     require("nonebot_plugin_htmlrender")
@@ -27,6 +29,11 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     #若没有输入则结束
     if txt == "" or txt is None:
         await chatglm.finish("你想问什么呢？", at_sender=True)
+
+    #检查服务器状态
+    if not await check.chk_server():
+        logger.error("连接服务器失败，请检查服务器状态。")
+        await chatglm.finish("服务器好像没有开启呢，问问我的主人吧！")
     
     #若响应成功则戳一戳用户
     await chatglm.send(Message(f'[CQ:poke,qq={event.user_id}]'))
@@ -38,38 +45,21 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     else:
         history = []
 
-    res = ""
     #调用API
     try:
-        #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
-        async with httpx.AsyncClient(timeout=httpx.Timeout(15.0)) as client:
-            res = await client.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
-            res.raise_for_status()
+        resp, history = await get_resp(txt, history)
 
     #排查错误
-    
-    except httpx.ConnectTimeout:
-        logger.error("连接服务器失败，请检查服务器状态\n" + res)
-        await chatglm.finish("服务好像没有开启呢，问问我的主人吧！", at_sender=True)
-
-    except httpx.NetworkError:
-        logger.error("出错了，请检查网络状态\n" + res)
-        await chatglm.finish("ChatGLM被玩坏了，这绝对不是ChatGLM的问题，绝对不是。", at_sender=True)
-
-    except httpx.TimeoutException:
-        logger.error("请求超时。\n" + res)
-        await chatglm.finish("可恶，这个AI没反应了，要不炖了吧？", at_sender=True)
-
-    except httpx.InvalidURL:
-        logger.error("API服务器地址格式有误")
-        await chatglm.finish("配置有误，请反馈给我的主人。", at_sender=True)
-
     except Exception as e:
-        logger.error("error:" + str(e) + "\nresponse:" + res)
-        await chatglm.finish(f"请求时出现未知错误：{str(e)}", at_sender=True)
-    
+        logger.exception("对话失败")
+        message = f"啊哦~"
+        for i in e.args:
+            message += str(i)
+        await chatglm.finish(message, at_sender=True)
+
+    #else:
     #得到正确回复
-    resp, history = res.json()["response"], res.json()["history"]
+    #    resp, history = res.json()["response"], res.json()["history"]
 
     #保存历史对话
     if config.chatglm_mmry:
@@ -104,3 +94,26 @@ def get_recpath(event):   #生成对应对话记录文件名
         uid = "Private_" + f"{event.user_id}"
     # if groupmessage get_session_id returns 'Group_{group_id}_{user_id}'
     return uid
+
+async def get_resp(txt, history):
+    #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history) as res:
+                if res.status not in [200, 201]:
+                    logger.error(await res.text())
+                    raise RuntimeError(f"与服务器沟通时发生{res.status}错误")
+                resp, history = (await res.json())["response"], (await res.json())["history"]
+                return resp, history
+
+    except aiohttp.ServerTimeoutError:  #响应超时
+        logger.error("请求超时。\n" + res)
+        raise RuntimeError(f"可恶，这个AI没反应了，要不炖了吧？")
+
+    except aiohttp.InvalidURL:  #地址错误
+        logger.error("API服务器地址格式有误")
+        raise RuntimeError(f"配置有误，请反馈给我的主人。")
+
+    except Exception as e:  #其他情况
+        logger.error("error:" + str(e) + "\nresponse:" + await res.text())
+        raise RuntimeError(f"请求时出现未知错误：{str(e)}")
