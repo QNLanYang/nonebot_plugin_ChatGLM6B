@@ -1,12 +1,12 @@
 from nonebot import on_command, require
 from nonebot.rule import to_me
 from nonebot.log import logger
-from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment, Bot
+from nonebot.adapters.onebot.v11 import (MessageEvent, Message, MessageSegment, Bot)
 from nonebot.params import CommandArg
 
-import httpx
-
-from .utils import config
+from .save import record
+from .request import request
+from .config import config
 
 if config.chatglm_2pic:
     require("nonebot_plugin_htmlrender")
@@ -30,36 +30,32 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     #若响应成功则戳一戳用户
     await chatglm.send(Message(f'[CQ:poke,qq={event.user_id}]'))
 
-    #检查地址是否填写
-    if not await config.check_addr(config.chatglm_addr):
-        await chatglm.finish("请检查API地址是否填写正确，以'http(s)://'开头", at_sender=True)
+    #检查服务器状态
+    if not await request.chk_server():
+        logger.error("连接服务器失败，请检查服务器状态。")
+        await chatglm.finish("服务器好像没有开启呢，问问我的主人吧！")
 
     #读取历史对话记录
     if config.chatglm_mmry:
-        history = await config.load_history()
+        history, jsonpath = await record.load_history(event)
     else:
         history = []
 
     #调用API
     try:
-        #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)        
-        async with httpx.AsyncClient() as api:
-            res = await api.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
+        resp, history = await request.get_resp(txt, history)
 
     #排查错误
-    except Exception as error:
-        logger.error(error)
-        await chatglm.finish(str(error), at_sender=True)
-    
-    if res.status_code != 200:
-        await chatglm.finish(f"与API服务器沟通时出现问题，错误{res.status_code}", at_sender=True)
-    
-    #得到正确回复
-    resp, history = res.json()["response"], res.json()["history"]
+    except Exception as e:
+        logger.exception("对话失败", stack_info=True)
+        message = f"啊哦~ 出现了以下错误呢……\n"
+        for i in e.args:
+            message += str(i)
+        await chatglm.finish(message, at_sender=True)
 
     #保存历史对话
     if config.chatglm_mmry:
-        await config.save_history(history)
+        await record.save_history(history,jsonpath)
 
     #转图片
     if config.chatglm_2pic:
@@ -75,9 +71,7 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     else:
         await chatglm.finish(resp, at_sender=True)
 
-@clr_log.handle()
-async def clear_history():
-    if await config.clr_history():
+@clr_log.handle()   #清除历史功能
+async def clear_history(event=MessageEvent):
+    if await record.clr_history(event):
         await clr_log.finish("历史对话已清除。")
-
-
