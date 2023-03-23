@@ -4,21 +4,20 @@ import aiohttp
 
 from .config import config
 
-class Check:
+class Request:
+    #检查服务器连通性
     async def chk_server(self):
         async with aiohttp.ClientSession() as session:
             async with session.get(f"{config.chatglm_addr}/") as test:
                 if (await test.json())["message"]!="Hello ChatGLM API!":
                     return False
                 return True
-
-check = Check()
-
-class Request:
+    
+    #发送请求
     async def get_resp(txt, history):
     #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
         try:
-            async with aiohttp.ClientSession() as session:  #发送请求
+            async with aiohttp.ClientSession() as session:
                 async with session.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history) as res:
                     if res.status not in [200, 201]:
                         logger.error(await res.text())

@@ -30,7 +30,7 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
         await chatglm.finish("你想问什么呢？", at_sender=True)
 
     #检查服务器状态
-    if not await check.chk_server():
+    if not await request.chk_server():
         logger.error("连接服务器失败，请检查服务器状态。")
         await chatglm.finish("服务器好像没有开启呢，问问我的主人吧！")
     
@@ -54,10 +54,6 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
         for i in e.args:
             message += str(i)
         await chatglm.finish(message, at_sender=True)
-
-    #else:
-    #得到正确回复
-    #    resp, history = res.json()["response"], res.json()["history"]
 
     #保存历史对话
     if config.chatglm_mmry:

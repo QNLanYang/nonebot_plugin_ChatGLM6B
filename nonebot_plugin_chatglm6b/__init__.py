@@ -15,6 +15,6 @@ driver = get_driver()
 @driver.on_startup
 async def startup():
     if not await config.config.check_addr(config.config.chatglm_addr):
-        if not await request.check.chk_server():
+        if not await request.request.chk_server():
             logger.error("API地址未填写或格式错误！")
             raise ValueError("请检查API地址填写是否正确！")
