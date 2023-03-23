@@ -7,14 +7,18 @@ from .config import config
 class Request:
     #检查服务器连通性
     async def chk_server(self):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f"{config.chatglm_addr}/") as test:
-                if (await test.json())["message"]!="Hello ChatGLM API!":
-                    return False
-                return True
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{config.chatglm_addr}/") as test:
+                    if (await test.json())["message"]!="Hello ChatGLM API!":
+                        return False
+                    return True
+        except aiohttp.ClientConnectorError:
+            logger.exception("无法连接至服务器", stack_info=True)
+            return False
     
     #发送请求
-    async def get_resp(txt, history):
+    async def get_resp(self, txt, history):
     #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
         try:
             async with aiohttp.ClientSession() as session:

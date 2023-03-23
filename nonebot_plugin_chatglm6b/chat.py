@@ -7,7 +7,7 @@ from nonebot.params import CommandArg
 import aiohttp
 
 from .save import record
-from .request import check, request
+from .request import request
 from .config import config
 
 if config.chatglm_2pic:
@@ -28,14 +28,14 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     #若没有输入则结束
     if txt == "" or txt is None:
         await chatglm.finish("你想问什么呢？", at_sender=True)
+    
+    #若响应成功则戳一戳用户
+    await chatglm.send(Message(f'[CQ:poke,qq={event.user_id}]'))
 
     #检查服务器状态
     if not await request.chk_server():
         logger.error("连接服务器失败，请检查服务器状态。")
         await chatglm.finish("服务器好像没有开启呢，问问我的主人吧！")
-    
-    #若响应成功则戳一戳用户
-    await chatglm.send(Message(f'[CQ:poke,qq={event.user_id}]'))
 
     #读取历史对话记录
     if config.chatglm_mmry:
@@ -49,8 +49,8 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
 
     #排查错误
     except Exception as e:
-        logger.exception("对话失败")
-        message = f"啊哦~"
+        logger.exception("对话失败", stack_info=True)
+        message = f"啊哦~ 出现了以下错误呢……\n"
         for i in e.args:
             message += str(i)
         await chatglm.finish(message, at_sender=True)

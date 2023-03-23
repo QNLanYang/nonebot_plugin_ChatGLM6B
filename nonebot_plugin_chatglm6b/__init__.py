@@ -18,3 +18,4 @@ async def startup():
         if not await request.request.chk_server():
             logger.error("API地址未填写或格式错误！")
             raise ValueError("请检查API地址填写是否正确！")
+    logger.debug("API Address comfirmed")
