@@ -44,6 +44,8 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     #调用API
     try:
         resp, history = await request.get_resp(txt, history)
+        if resp == None:
+            raise RuntimeError("Response from ChatGLM server is None.")
 
     #排查错误
     except Exception as e:
@@ -61,7 +63,7 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     if config.chatglm_2pic:
         if resp.count("```") % 2 != 0:
             resp += "\n```"
-        img = await md_to_pic(resp, width=400)
+        img = await md_to_pic(resp, width=config.chatglm_wide)
         resp = MessageSegment.image(img)
 
     #返回生成的文本
@@ -72,6 +74,6 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
         await chatglm.finish(resp, at_sender=True)
 
 @clr_log.handle()   #清除历史功能
-async def clear_history(event=MessageEvent):
+async def clear_history(event: MessageEvent):
     if await record.clr_history(event):
         await clr_log.finish("历史对话已清除。")

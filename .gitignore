@@ -1,2 +1,3 @@
 dist/
 nonebot_plugin_chatglm6b.egg-info/
+*.zip
