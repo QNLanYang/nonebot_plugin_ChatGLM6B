@@ -14,7 +14,7 @@ class Record:
             if config.chatglm_pblc:
                 uid = uid.replace(f"{event.user_id}", "Public")
         elif isinstance(event, PrivateMessageEvent):
-            uid = "Private_" + f"{event.user_id}"
+            uid = f"Private_{event.user_id}"
     # if groupmessage get_session_id returns 'Group_{group_id}_{user_id}'
         jsonpath = Path(f"data/chatglm/history_{uid}.json").resolve()
         return jsonpath

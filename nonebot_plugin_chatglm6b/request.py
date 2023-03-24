@@ -16,13 +16,13 @@ class Request:
         except aiohttp.ClientConnectorError:
             logger.exception("无法连接至服务器", stack_info=True)
             return False
-    
+
     #发送请求
     async def get_resp(self, txt, history):
-    #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
+
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history) as res:
+                async with session.post(f"{config.chatglm_addr}/predict?user_msg={txt}&max_length={config.chatglm_model_leng}&top_p={config.chatglm_model_topp}&temperature={config.chatglm_model_temp}", json=history) as res:
                     if res.status not in [200, 201]:
                         logger.error(await res.text())
                         raise RuntimeError(f"与服务器沟通时发生{res.status}错误")
