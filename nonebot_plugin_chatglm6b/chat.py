@@ -2,7 +2,8 @@ from nonebot import on_command, require
 from nonebot.rule import to_me
 from nonebot.typing import T_State
 from nonebot.log import logger
-from nonebot.adapters.onebot.v11 import (MessageEvent, Message, MessageSegment, Bot)
+from nonebot.adapters.onebot.v11 import (MessageEvent,
+                            Message, MessageSegment, Bot)
 from nonebot.params import CommandArg, _shell_command_argv
 
 from .save import record
@@ -15,9 +16,11 @@ if config.chatglm_2pic:
 
 #以上为import部分，以下为实现部分
 
-chatglm = on_command("GLM", aliases={"#"}, priority=99, block=False, rule=to_me(), state=T_State)
+chatglm = on_command("GLM", aliases={"#"}, priority=99,
+                    block=False, rule=to_me())
 
-clr_log = on_command("清除上下文", aliases={"clrlog"}, priority=99, block=False, rule=to_me())
+clr_log = on_command("清除上下文", aliases={"clrlog"}, priority=99,
+                    block=False, rule=to_me())
 
 @chatglm.handle()
 async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
@@ -46,7 +49,8 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     try:
         resp, history = await request.get_resp(txt, history)
         if resp == None:
-            raise RuntimeError("Response from ChatGLM server is None.")
+            raise RuntimeError("Response from ChatGLM server is None.\n\
+                            Maybe you've reached the max_length limit?")
 
     #排查错误
     except Exception as e:

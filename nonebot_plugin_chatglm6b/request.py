@@ -19,13 +19,10 @@ class Request:
 
     #发送请求
     async def get_resp(self, txt, history):
-    #res = requests.post(f"{config.chatglm_addr}/predict?user_msg={txt}", json=history)
-        max_length = 4096
-        top_p = 0.7
-        temperature = 0.95
+
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(f"{config.chatglm_addr}/predict?user_msg={txt}&max_length={max_length}&top_p={top_p}&temperature={temperature}", json=history) as res:
+                async with session.post(f"{config.chatglm_addr}/predict?user_msg={txt}&max_length={config.chatglm_model_leng}&top_p={config.chatglm_model_topp}&temperature={config.chatglm_model_temp}", json=history) as res:
                     if res.status not in [200, 201]:
                         logger.error(await res.text())
                         raise RuntimeError(f"与服务器沟通时发生{res.status}错误")
