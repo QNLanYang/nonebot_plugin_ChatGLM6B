@@ -37,25 +37,35 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 #### 注意事项
 
 本插件需要你有部署好的 ChatGLM-6B 并且成功运行 ChatGLM-6B-API
-关于本地部署的细节请点击上方相关链接自行查询（或者我可以考虑B站出个教程 ~~如果给我点star的话~~）
+关于本地部署的细节请点击上方相关链接自行查询（或者我可以考虑 B 站出个教程 ~~如果给我点 star 的话~~）
 
 ### 最新消息
+
+**v0.1.1** --> **v0.1.2**
+一次普通更新，主要内容有：
+
+- 新增了 对官方 API 的支持，现在需要在配置项添加‘CHATGLM_API’来选择你使用的 API；
+
+- 优化了 保存历史对话时生成的文件可阅读了；
+
+- 修复了 配置项 _CHATGLM_POKE_ 失效的问题；
 
 **v0.1.0** --> **v0.1.1**
 一次小的更新，主要内容有：
 
-- 修复了	清除对话记录无反应的问题；
-- 修复了	配置项 *CHATGLM_WIDE* 失效的问题；
-- 修复了	部分配置项未配置时默认值出错的问题；
-- 新增了	对服务器返回消息但内容为空的异常处理；
-  
-  *可能是由于输入内容长度（含历史记录）超出模型设置*
-- 针对上一条情况新增了配置项以微调模型参数；
-  
-  *需要同步更新 [ChatGLM-6B-API](https://github.com/imClumsyPanda/ChatGLM-6B-API) 以支持模型微调*
-  
-  *（上述更新还包含增加显存释放以及修复模型重复载入的bug，强烈建议更新）*
+- 修复了 清除对话记录无反应的问题；
+- 修复了 配置项 _CHATGLM_WIDE_ 失效的问题；
+- 修复了 部分配置项未配置时默认值出错的问题；
 
+- 新增了 对服务器返回消息但内容为空的异常处理；
+
+  _可能是由于输入内容长度（含历史记录）超出模型设置_
+
+- 针对上一条情况新增了配置项以微调模型参数；
+
+  _需要同步更新 [ChatGLM-6B-API](https://github.com/imClumsyPanda/ChatGLM-6B-API) 以支持模型微调_
+
+  _（上述更新还包含增加显存释放以及修复模型重复载入的 bug，强烈建议更新）_
 
 ## 💿 安装
 
@@ -118,24 +128,32 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 
 不要忘记在 nonebot2 项目的`.env`文件中添加下表中的必填配置
 
-|    配置项    | 必填 |  类型  | 默认值  | 说明                                                        |
-| :----------: | :--: | :----: | :-----: | :---------------------------------------------------------- |
-| CHATGLM_ADDR |  是  | `str`  |   无    | 你的 ChatGLM API 的接口地址，例如`http://127.0.0.1:11451`   |
-| CHATGLM_POKE |  否  | `bool` | `True`  | 收到请求后是否戳一戳发送者                                  |
-| CHATGLM_2PIC |  否  | `bool` | `False` | 是否将收到的回答以图片形式发送                              |
-| CHATGLM_WIDE |  否  | `int`  |  `400`  | 转图片时的图片宽度（单位：像素）                            |
-| CHATGLM_MMRY |  否  | `int`  |  `10`   | 对话时机器人所能记住的最大对话轮数，设为`0`则每次都为新对话 |
-| CHATGLM_PBLC |  否  | `bool` | `False` | 在群聊中是否启用公共对话，即群员共用对话历史                |
-| CHATGLM_RPLY |  否  | `bool` | `False` | 机器人返回内容时是否回复对应消息                            |
+|    配置项    |  必填  |  类型  | 默认值  | 说明                                                          |
+| :----------: | :----: | :----: | :-----: | :------------------------------------------------------------ |
+| CHATGLM_ADDR | **是** | `str`  |   无    | 你的 ChatGLM API 的接口地址，_例如`http://127.0.0.1:11451`_   |
+| CHATGLM_API  | **是** | `str`  |   无    | 你使用的 API 是谁提供的，_详情看表格下方的注释_               |
+| CHATGLM_POKE |   否   | `bool` | `True`  | 收到请求后是否戳一戳发送者                                    |
+| CHATGLM_2PIC |   否   | `bool` | `False` | 是否将收到的回答以图片形式发送                                |
+| CHATGLM_WIDE |   否   | `int`  |  `400`  | 转图片时的图片宽度*（单位：像素）*                            |
+| CHATGLM_MMRY |   否   | `int`  |  `10`   | 对话时机器人所能记住的最大对话轮数，_设为`0`则每次都为新对话_ |
+| CHATGLM_PBLC |   否   | `bool` | `False` | 在群聊中是否启用公共对话，_即群员共用对话历史_                |
+| CHATGLM_RPLY |   否   | `bool` | `False` | 机器人返回内容时是否回复对应消息                              |
 
-### 模型微调相关配置
+ℹ️**关于 CHATGLM_API**：_（大小写敏感）_
 
-|       配置项       | 必填 |  类型   | 默认值 | 说明                                                  |
-| :----------------: | :--: | :-----: | :----: | :---------------------------------------------------- |
-| CHATGLM_MODEL_LENG |  否  |  `int`  | `2048` | 模型的`max_length`参数，决定了模型接受输入的token上限 |
-| CHATGLM_MODEL_TEMP |  否  | `float` | `0.95` | 模型的`temperature`参数，决定了模型输出对话的随机程度 |
-| CHATGLM_MODEL_TOPP |  否  | `float` | `0.7`  | 模型的`top_P`参数，决定了模型输出与输入内容的相关性   |
+如果你使用的是 ChatGLM-6B 官方仓库里的 **[API.py](https://github.com/THUDM/ChatGLM-6B/blob/main/api.py)**，请在配置项填入 `official`
 
+如果你使用的是 本项目致谢的 **[ChatGLM-6B-API](https://github.com/imClumsyPanda/ChatGLM-6B-API)**，请在配置项填入 `6b-api`
+
+### 🔧 模型微调相关配置
+
+|       配置项       | 必填 |  类型   | 默认值 | 说明                                                    |
+| :----------------: | :--: | :-----: | :----: | :------------------------------------------------------ |
+| CHATGLM_MODEL_LENG |  否  |  `int`  | `2048` | 模型的`max_length`参数，决定了模型接受输入的 token 上限 |
+| CHATGLM_MODEL_TEMP |  否  | `float` | `0.95` | 模型的`temperature`参数，决定了模型输出对话的随机程度   |
+| CHATGLM_MODEL_TOPP |  否  | `float` | `0.7`  | 模型的`top_P`参数，决定了模型输出与输入内容的相关性     |
+
+**注意**：所有配置项均还未设置取值范围检查，错误的设置可能带来严重的后果
 
 ## 🎉 使用
 
@@ -158,8 +176,10 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 
 - [x] ~~加入记忆保存上下文~~
 - [x] ~~区分每个用户的对话历史，并加入可选参数选择群聊对话为私有或公开~~
-- [ ] 加入对更多API的支持   *官方API:在做*   *webui:不太好弄*
-- [ ] 将模型微调参数改为随时可调（通过命令以及消息后附带参数）
+- [x] ~~加入对更多 API 的支持——_官方 API:做好了_~~
+- [ ] 加入对更多 API 的支持 _webui:不太好弄_
+- [ ] 为配置项加入取值范围检查避免错误
+- [ ] 将模型微调参数改为随时可调*（通过命令或消息后附带参数）*
 - [ ] 加入预设机器人人格
 - [ ] 加入更多管理员指令
 
@@ -168,6 +188,6 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 - [@A-kirami](https://github.com/A-kirami)，本项目使用了 README[模板](https://github.com/A-kirami/nonebot-plugin-template)，有修改
 - [nonebot2](https://github.com/nonebot/nonebot2)，一切的基础
 - [ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B)，可以跑在消费级显卡上的大语言模型
-- [ChatGLM-6B-API](https://github.com/imClumsyPanda/ChatGLM-6B-API)，本项目的灵感来源，提供了与GLM6B交流的API
+- [ChatGLM-6B-API](https://github.com/imClumsyPanda/ChatGLM-6B-API)，本项目的灵感来源，提供了与 GLM6B 交流的 API
 - [nonebot-plugin-novelai](https://github.com/sena-nana/nonebot-plugin-novelai)，学习的对象，配置项导入的部分来源于此
 - [nonebot-plugin-ChatGLM](https://github.com/DaoMingze/zhukebot/tree/main/zhukebot/plugins/chatglm)，与本项目相似，但是本地部署的版本，从中学习优化代码结构（或新功能？）~~开抄！~~
