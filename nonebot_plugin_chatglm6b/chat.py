@@ -80,4 +80,4 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
 @clr_log.handle()   #清除历史功能
 async def clear_history(event: MessageEvent):
     if await record.clr_history(event):
-        await clr_log.finish("历史对话已清除。")
+        await clr_log.finish("你的历史对话已清除。", at_sender=True)
