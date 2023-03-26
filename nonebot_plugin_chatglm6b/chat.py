@@ -32,12 +32,14 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
         await chatglm.finish("你想问什么呢？", at_sender=True)
     
     #若响应成功则戳一戳用户
-    await chatglm.send(Message(f'[CQ:poke,qq={event.user_id}]'))
+    if config.chatglm_poke:
+        await chatglm.send(Message(f'[CQ:poke,qq={event.user_id}]'))
 
-    #检查服务器状态
-    if not await request.chk_server():
-        logger.error("连接服务器失败，请检查服务器状态。")
-        await chatglm.finish("服务器好像没有开启呢，问问我的主人吧！")
+    #检查服务器状态 (暂时弃用)
+#    if config.chatglm_api == "6b-api":
+#        if not await request.chk_server():
+#            logger.error("连接服务器失败，请检查服务器状态。")
+#            await chatglm.finish("服务器好像没有开启呢，问问我的主人吧！")
 
     #读取历史对话记录
     if config.chatglm_mmry:
@@ -48,9 +50,6 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     #调用API
     try:
         resp, history = await request.get_resp(txt, history)
-        if resp == None:
-            raise RuntimeError("Response from ChatGLM server is None.\n\
-                            Maybe you've reached the max_length limit?")
 
     #排查错误
     except Exception as e:
