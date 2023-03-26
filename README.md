@@ -158,6 +158,7 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 
 - [x] ~~加入记忆保存上下文~~
 - [x] ~~区分每个用户的对话历史，并加入可选参数选择群聊对话为私有或公开~~
+- [ ] 加入对更多API的支持   *官方API:在做*   *webui:不太好弄*
 - [ ] 将模型微调参数改为随时可调（通过命令以及消息后附带参数）
 - [ ] 加入预设机器人人格
 - [ ] 加入更多管理员指令
@@ -167,6 +168,6 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 - [@A-kirami](https://github.com/A-kirami)，本项目使用了 README[模板](https://github.com/A-kirami/nonebot-plugin-template)，有修改
 - [nonebot2](https://github.com/nonebot/nonebot2)，一切的基础
 - [ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B)，可以跑在消费级显卡上的大语言模型
-- [ChatGLM-6B-API](https://github.com/imClumsyPanda/ChatGLM-6B-API)，提供了与GLM6B交流的API
+- [ChatGLM-6B-API](https://github.com/imClumsyPanda/ChatGLM-6B-API)，本项目的灵感来源，提供了与GLM6B交流的API
 - [nonebot-plugin-novelai](https://github.com/sena-nana/nonebot-plugin-novelai)，学习的对象，配置项导入的部分来源于此
 - [nonebot-plugin-ChatGLM](https://github.com/DaoMingze/zhukebot/tree/main/zhukebot/plugins/chatglm)，与本项目相似，但是本地部署的版本，从中学习优化代码结构（或新功能？）~~开抄！~~
