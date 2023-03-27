@@ -47,7 +47,7 @@ class Request:
                     return resp, history
 
         except aiohttp.ServerTimeoutError:  #响应超时
-            logger.error("请求超时。\n" + res)
+            logger.error("请求超时。\n")
             raise RuntimeError(f"可恶，这个AI没反应了，要不炖了吧？")
 
         except aiohttp.InvalidURL:  #地址错误
