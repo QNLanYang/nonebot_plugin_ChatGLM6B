@@ -21,10 +21,11 @@ class Request:
     async def get_resp(self, txt, history):
 
         if config.chatglm_api == "6b-api":  #使用我推荐的API
-            url = f"{config.chatglm_addr}/predict?user_msg={txt}\
-                        &max_length={config.chatglm_model_leng}\
-                        &top_p={config.chatglm_model_topp}\
-                        &temperature={config.chatglm_model_temp}"
+            url = (f"{config.chatglm_addr}/predict?"+
+                    f"user_msg={txt}"+
+                    f"&max_length={config.chatglm_model_leng}"+
+                    f"&top_p={config.chatglm_model_topp}"+
+                    f"&temperature={config.chatglm_model_temp}")
             json = history
 
         elif config.chatglm_api == "official":  #使用官方API
@@ -34,7 +35,7 @@ class Request:
         else:   #没有匹配的API
             raise ValueError("请选择正确的API配置！")
 
-        res: aiohttp.ClientResponse
+        res: aiohttp.ClientResponse = None
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, json = json) as res:
@@ -42,7 +43,7 @@ class Request:
                         logger.error(await res.text())
                         raise RuntimeError(f"与服务器沟通时发生{res.status}错误")
                     resp, history = (await res.json())["response"], (await res.json())["history"]
-                    if resp == None:    #确保有返回内容
+                    if not resp:    #确保有返回内容
                         raise RuntimeError("Response from ChatGLM server is None.\n\
                             Maybe you've reached the max_length limit?")
                     return resp, history

@@ -54,14 +54,14 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
     #排查错误
     except Exception as e:
         logger.exception("对话失败", stack_info=True)
-        message = f"啊哦~ 出现了以下错误呢……\n"
+        message = f"唔……出状况了。\n"
         for i in e.args:
             message += str(i)
         await chatglm.finish(message, at_sender=True)
 
     #保存历史对话
     if config.chatglm_mmry:
-        await record.save_history(history,jsonpath)
+        await record.save_history(history, jsonpath)
 
     #转图片
     if config.chatglm_2pic:
