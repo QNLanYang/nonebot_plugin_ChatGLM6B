@@ -34,6 +34,7 @@ class Request:
         else:   #没有匹配的API
             raise ValueError("请选择正确的API配置！")
 
+        res: aiohttp.ClientResponse
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, json = json) as res:
@@ -46,7 +47,7 @@ class Request:
                             Maybe you've reached the max_length limit?")
                     return resp, history
 
-        except aiohttp.ServerTimeoutError:  #响应超时
+        except aiohttp.ClientConnectorError:  #响应超时
             logger.error("请求超时。\n")
             raise RuntimeError(f"可恶，这个AI没反应了，要不炖了吧？")
 
