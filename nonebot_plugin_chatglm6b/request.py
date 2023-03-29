@@ -30,7 +30,10 @@ class Request:
 
         elif config.chatglm_api == "official":  #使用官方API
             url = f"{config.chatglm_addr}/"
-            json = {"prompt": txt, "history": history}
+            json = {"prompt": txt, "history": history,
+                    "max_length": config.chatglm_model_leng,
+                    "temperature": config.chatglm_model_temp,
+                    "top_p": config.chatglm_model_topp}
         
         else:   #没有匹配的API
             raise ValueError("请选择正确的API配置！")
