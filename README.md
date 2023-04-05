@@ -122,7 +122,7 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 | CHATGLM_API  | **是** | `str`  |   无    | 你使用的 API 是谁提供的，_详情看表格下方的注释_               |
 | CHATGLM_POKE |   否   | `bool` | `True`  | 收到请求后是否戳一戳发送者                                    |
 | CHATGLM_2PIC |   否   | `bool` | `False` | 是否将收到的回答以图片形式发送                                |
-| CHATGLM_WIDE |   否   | `int`  |  `400`  | 转图片时的图片宽度*（单位：像素）*                            |
+| CHATGLM_WIDE |   否   | `int`  |  `400`  | 转图片时的图片宽度 _（单位：像素）_                            |
 | CHATGLM_MMRY |   否   | `int`  |  `10`   | 对话时机器人所能记住的最大对话轮数，_设为`0`则每次都为新对话_ |
 | CHATGLM_PBLC |   否   | `bool` | `False` | 在群聊中是否启用公共对话，_即群员共用对话历史_                |
 | CHATGLM_RPLY |   否   | `bool` | `False` | 机器人返回内容时是否回复对应消息                              |
