@@ -43,6 +43,10 @@ class Record:
         log = await self.check_length(log)
         async with aiofiles.open(jsonpath, "w", encoding="utf-8") as f:
             jsonnew = json.dumps(log, ensure_ascii=False)   #不把汉字转为utf码
+            jsonnew = jsonnew.replace("[[", "[\n[")
+            jsonnew = jsonnew.replace("]]", "]\n]")
+            jsonnew = jsonnew.replace("], ", "],\n\n")
+            jsonnew = jsonnew.replace('", "', '",\n"')
             await f.write(jsonnew)
             logger.debug("Dialogue history saved Successfully.")
 
