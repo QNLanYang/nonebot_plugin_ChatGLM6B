@@ -22,12 +22,12 @@ class Record:
         if not jsonpath.exists():   #不存在则创建
             jsonpath.parent.mkdir(parents=True, exist_ok=True)
             async with aiofiles.open(jsonpath, "w", encoding="utf-8") as f:
-                await f.write("{}")
+                await f.write("[]")
         else:   #删除空记录
             async with aiofiles.open(jsonpath, "r+", encoding="utf-8") as f:
                 data = await f.read()
             if data is None:
-                await f.write("{}")
+                await f.write("[]")
 
     async def load_history(self,event):    #读取历史记录
         jsonpath = self.get_recpath(event)
@@ -42,7 +42,7 @@ class Record:
     async def save_history(self,log,jsonpath):    #保存对话记录 
         log = await self.check_length(log)
         async with aiofiles.open(jsonpath, "w", encoding="utf-8") as f:
-            jsonnew = json.dumps(log, ensure_ascii=False)   #不把汉字转为utf码
+            jsonnew = format(json.dumps(log, ensure_ascii=False))   #不把汉字转为utf码
             await f.write(jsonnew)
             logger.debug("Dialogue history saved Successfully.")
 
@@ -59,3 +59,10 @@ class Record:
         return True
 
 record = Record()
+
+def format(text):
+    text = text.replace("[[", "[\n[")
+    text = text.replace("]]", "]\n]")
+    text = text.replace("], ", "],\n\n")
+    text = text.replace('", "', '",\n"')
+    return text
