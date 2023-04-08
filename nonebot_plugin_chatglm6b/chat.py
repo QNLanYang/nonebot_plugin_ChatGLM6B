@@ -5,10 +5,14 @@ from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import (MessageEvent,
                             Message, MessageSegment, Bot)
 from nonebot.params import CommandArg, _shell_command_argv
+from collections import deque
+import asyncio
 
 from .save import record
 from .request import request
 from .config import config
+
+chat_queue: deque = deque([])
 
 if config.chatglm_2pic:
     require("nonebot_plugin_htmlrender")
@@ -41,41 +45,52 @@ async def chat(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
 #            logger.error("连接服务器失败，请检查服务器状态。")
 #            await chatglm.finish("服务器好像没有开启呢，问问我的主人吧！")
 
-    #读取历史对话记录
-    if config.chatglm_mmry:
-        history, jsonpath = await record.load_history(event)
-    else:
-        history = []
+    #简易的消息队列控制，一定程度上防止群友们一股脑问问题问爆显存
+    chat_queue.append(event)
+    while True:
 
-    #调用API
-    try:
-        resp, history = await request.get_resp(txt, history)
+        if chat_queue[0] is event:    
+        #读取历史对话记录
+            if config.chatglm_mmry:
+                history, jsonpath = await record.load_history(event)
+            else:
+                history = []
 
-    #排查错误
-    except Exception as e:
-        logger.exception("对话失败", stack_info=True)
-        message = f"唔……出状况了。\n"
-        for i in e.args:
-            message += str(i)
-        await chatglm.finish(message, at_sender=True)
+            #调用API
+            try:
+                resp, history = await request.get_resp(txt, history)
 
-    #保存历史对话
-    if config.chatglm_mmry:
-        await record.save_history(history, jsonpath)
+            #排查错误
+            except Exception as e:
+                logger.exception("对话失败", stack_info=True)
+                message = f"唔……出状况了。\n"
+                for i in e.args:
+                    message += str(i)
+                await chatglm.finish(message, at_sender=True)
+            
+            finally:
+                chat_queue.popleft()
 
-    #转图片
-    if config.chatglm_2pic:
-        if resp.count("```") % 2 != 0:
-            resp += "\n```"
-        img = await md_to_pic(resp, width=config.chatglm_wide)
-        resp = MessageSegment.image(img)
+            #保存历史对话
+            if config.chatglm_mmry:
+                await record.save_history(history, jsonpath)
 
-    #返回生成的文本
-    if config.chatglm_rply:
-        ans = MessageSegment.reply(event.message_id) + resp
-        await chatglm.finish(ans)
-    else:
-        await chatglm.finish(resp, at_sender=True)
+            #转图片
+            if config.chatglm_2pic:
+                if resp.count("```") % 2 != 0:
+                    resp += "\n```"
+                img = await md_to_pic(resp, width=config.chatglm_wide)
+                resp = MessageSegment.image(img)
+
+            #返回生成的文本
+            if config.chatglm_rply:
+                ans = MessageSegment.reply(event.message_id) + resp
+                await chatglm.finish(ans)
+            else:
+                await chatglm.finish(resp, at_sender=True)
+
+        else:
+            await asyncio.sleep(1)
 
 @clr_log.handle()   #清除历史功能
 async def clear_history(event: MessageEvent):
