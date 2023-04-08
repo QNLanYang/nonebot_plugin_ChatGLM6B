@@ -41,18 +41,17 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 
 ### 最新消息
 
+**v0.1.4** --> **v0.1.5**
+
+✨ 感谢 **[KirbyScarlet](https://github.com/KirbyScarlet)** 的初次贡献 **[添加队列防止堵塞](https://github.com/QNLanYang/nonebot_plugin_ChatGLM6B/pull/19)** ✨
+
+- 优化了 保存的历史记录文件的格式，加入换行使其更易读也更容易编辑；
+
 **v0.1.3** --> **v0.1.4**
 
 官方仓库 API 更新，本插件同步更新：
 
 - 新增了 对官方新版 API 的适配，现在使用官方 API 也可以传入模型参数了；
-
-**v0.1.2** --> **v0.1.3**
-
-小修小补的累积更新，主要内容有：
-
-- 优化了 捕获异常的代码结构；
-- 修复了 使用 6b-api 时传入数据含有大量空格的 bug；
 
 ## 💿 安装
 
@@ -122,7 +121,7 @@ _✨ ChatGPT 连不上？不如看看本地部署的 GLM 吧 ✨_
 | CHATGLM_API  | **是** | `str`  |   无    | 你使用的 API 是谁提供的，_详情看表格下方的注释_               |
 | CHATGLM_POKE |   否   | `bool` | `True`  | 收到请求后是否戳一戳发送者                                    |
 | CHATGLM_2PIC |   否   | `bool` | `False` | 是否将收到的回答以图片形式发送                                |
-| CHATGLM_WIDE |   否   | `int`  |  `400`  | 转图片时的图片宽度 _（单位：像素）_                            |
+| CHATGLM_WIDE |   否   | `int`  |  `400`  | 转图片时的图片宽度 _（单位：像素）_                           |
 | CHATGLM_MMRY |   否   | `int`  |  `10`   | 对话时机器人所能记住的最大对话轮数，_设为`0`则每次都为新对话_ |
 | CHATGLM_PBLC |   否   | `bool` | `False` | 在群聊中是否启用公共对话，_即群员共用对话历史_                |
 | CHATGLM_RPLY |   否   | `bool` | `False` | 机器人返回内容时是否回复对应消息                              |
